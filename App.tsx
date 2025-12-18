@@ -9,11 +9,16 @@ import * as pdfjsLib from 'pdfjs-dist';
 import ePub from 'epubjs';
 import JSZip from 'jszip';
 
-const PDFJS_VERSION = '4.0.379';
-const workerUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.mjs`;
+// Versão sincronizada com o importmap no index.html
+const PDFJS_VERSION = '4.10.38';
+const workerUrl = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.mjs`;
 
-if (typeof window !== 'undefined' && pdfjsLib.GlobalWorkerOptions) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+try {
+  if (typeof window !== 'undefined' && pdfjsLib.GlobalWorkerOptions) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+  }
+} catch (e) {
+  console.error("Erro ao configurar PDF.js Worker:", e);
 }
 
 const DB_NAME = 'ComicReaderDB';
@@ -21,15 +26,19 @@ const STORE_NAME = 'comics';
 
 const openDB = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    try {
+      const request = indexedDB.open(DB_NAME, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    } catch (e) {
+      reject(e);
+    }
   });
 };
 
@@ -44,7 +53,6 @@ const App: React.FC = () => {
 
   const t = translations[locale];
 
-  // Atualizar título da aba com base no estado
   useEffect(() => {
     if (activeComic) {
       document.title = `Lendo: ${activeComic.name}`;
@@ -64,7 +72,9 @@ const App: React.FC = () => {
           setComics(request.result || []);
           setIsDbReady(true);
         };
+        request.onerror = () => setIsDbReady(true);
       } catch (err) {
+        console.error("IndexedDB não disponível:", err);
         setIsDbReady(true);
       }
     };
@@ -72,17 +82,21 @@ const App: React.FC = () => {
   }, []);
 
   const saveToDB = async (newComics: Comic[]) => {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    newComics.forEach(c => store.put(c));
+    try {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      newComics.forEach(c => store.put(c));
+    } catch (e) { console.error(e); }
   };
 
   const updateInDB = async (comic: Comic) => {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    store.put(comic);
+    try {
+      const db = await openDB();
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.put(comic);
+    } catch (e) { console.error(e); }
   };
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,11 +134,15 @@ const App: React.FC = () => {
               });
             }
           }
-        } catch (e) { return undefined; }
+          return undefined;
+        } catch (e) { 
+          console.warn("Thumbnail falhou para:", file.name);
+          return undefined; 
+        }
     };
 
     for (const file of fileList) {
-      const thumb = await generateThumbnail(file) as string;
+      const thumb = await generateThumbnail(file);
       const name = file.name;
       let format: 'pdf' | 'epub' | 'cbz' = 'pdf';
       if (name.toLowerCase().endsWith('.epub')) format = 'epub';
@@ -135,7 +153,7 @@ const App: React.FC = () => {
         name: name,
         format: format,
         fileData: file,
-        thumbnail: thumb,
+        thumbnail: thumb as string | undefined,
         isFavorite: false,
         totalPages: 0,
         currentPage: 0,
