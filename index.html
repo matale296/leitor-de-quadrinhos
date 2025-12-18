@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Age Comic Reader | Seu Acervo Retrô</title>
+    
+    <!-- SEO & Social Media -->
+    <meta name="description" content="Leitor premium de quadrinhos retrô. Suporte para PDF, EPUB e CBZ com estética da Era de Ouro.">
+    <meta property="og:title" content="Golden Age Comic Reader">
+    <meta property="og:description" content="Sua coleção de quadrinhos em uma experiência clássica e integrada.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#c41e3a">
+
+    <!-- Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Favicon (Comic Bubble SVG) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23c41e3a%22 rx=%2220%22/><text y=%22.9em%22 font-size=%2280%22 x=%225%22 font-family=%22serif%22 fill=%22white%22 fw=%22bold%22>!</text></svg>">
+
+    <style>
+        .font-comic-header { font-family: 'Bangers', cursive; letter-spacing: 0.05em; }
+        .font-comic-body { font-family: 'Comic Neue', cursive; }
+        .font-ui { font-family: 'Inter', sans-serif; }
+        
+        /* Custom scrollbar - Estilo HQ */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #c41e3a; border-radius: 5px; border: 2px solid #1a1a1a; }
+        ::-webkit-scrollbar-thumb:hover { background: #e62e4d; }
+
+        .comic-border { border: 3px solid black; }
+        .comic-shadow { box-shadow: 4px 4px 0px 0px rgba(0,0,0,1); }
+        .comic-shadow-red { box-shadow: 4px 4px 0px 0px #c41e3a; }
+        .comic-shadow-yellow { box-shadow: 4px 4px 0px 0px #ffd700; }
+
+        /* Estilos globais para transição suave */
+        body {
+            transition: background-color 0.3s ease;
+        }
+
+        #epub-render-container iframe {
+            background: white !important;
+        }
+        
+        /* Previne seleção de texto acidental durante a leitura */
+        .select-none {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "pdfjs-dist": "https://esm.sh/pdfjs-dist@4.0.379",
+        "epubjs": "https://esm.sh/epubjs@0.3.93",
+        "jszip": "https://esm.sh/jszip@3.10.1"
+      }
+    }
+    </script>
+</head>
+<body class="bg-[#121212] text-white selection:bg-yellow-400 selection:text-black overflow-x-hidden">
+    <div id="root"></div>
+</body>
+</html>

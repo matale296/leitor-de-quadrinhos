@@ -1,0 +1,9 @@
+{
+  "name": "Golden Age Comic Reader",
+  "description": "Premium retro comic reader for PDF, EPUB and CBZ with a classic Golden Age aesthetic.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "author": "Senior Frontend Engineer",
+  "version": "1.0.0"
+}
